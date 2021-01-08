@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+    worker:
+        build:
+            context: ${KETTLE_ROOT_DIR}
+            dockerfile: docker/Dockerfile.worker
+        container_name: worker
+        hostname: worker
+        environment:
+            - CORE_USER=${CORE_USER}
+            - CORE_PASSWORD=${CORE_PASSWORD}
+            - CORE_IP_ADDR=${CORE_IP_ADDR}
+            - CORE_BROKER_HPORT=${CORE_BROKER_HPORT}
+            - CORE_RESULT_HPORT=${CORE_RESULT_HPORT}
+            - KETTLE_MOUNT_ROOT=${KETTLE_MOUNT_ROOT}
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /proc:/host_proc
+            - ${CORE_TMP_MOUNT}:/kettle_host_tmp
+        networks:
+            - core-net
+networks:
+    core-net:
+        driver: bridge

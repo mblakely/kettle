@@ -1,0 +1,3 @@
+job: all
+worker_queue:
+- defalut: 1

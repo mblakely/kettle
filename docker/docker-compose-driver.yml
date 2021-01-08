@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+    driver:
+        build:
+            context: ${KETTLE_ROOT_DIR}
+            dockerfile: docker/Dockerfile.driver
+        hostname: driver
+        environment:
+            - DRIVER_NAME=${DRIVER_NAME}
+            - DRIVER_MIN_NUM_WORKERS=${DRIVER_MIN_NUM_WORKERS}
+            - CORE_USER=${CORE_USER}
+            - CORE_PASSWORD=${CORE_PASSWORD}
+            - CORE_IP_ADDR=${CORE_IP_ADDR}
+            - CORE_BROKER_HPORT=${CORE_BROKER_HPORT}
+            - CORE_RESULT_HPORT=${CORE_RESULT_HPORT}
+            - KETTLE_MOUNT_ROOT=${KETTLE_MOUNT_ROOT}
+        container_name: driver
+        networks:
+            - core-net
+networks:
+    core-net:
+        driver: bridge

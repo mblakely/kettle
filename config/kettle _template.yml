@@ -1,0 +1,6 @@
+#path to private key to initialize connections
+KETTLE_ROOT_DIR: C:\Project\
+KETTLE_MOUNT_ROOT: \\wsl$\
+lead_node: node0
+nodes:
+  - node0: 0.0.0.0

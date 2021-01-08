@@ -1,0 +1,12 @@
+FROM python:3.8
+WORKDIR /kettle
+
+# Install python3 dependencies
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
+
+# Copy remaining files
+COPY . .
+
+# Run worker
+CMD cd / && python3 -u -m kettle.celery.${DRIVER_NAME}

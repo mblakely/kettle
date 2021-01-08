@@ -1,0 +1,96 @@
+version: '3.8'
+services:
+    # Celery web-ui
+    flower:
+        image: mher/flower:0.9.5
+        hostname: core-flower
+        container_name: flower
+        restart: always
+        environment:
+            - FLOWER_BASIC_AUTH=${CORE_USER}:${CORE_PASSWORD}
+        ports:
+            - '8082:5555'
+        depends_on:
+            - rabbitmq
+            - redis
+        entrypoint: flower --broker=amqp://${CORE_USER}:${CORE_PASSWORD}@rabbitmq:${CORE_BROKER_CPORT}//
+        networks:
+            - core-net
+
+    # Redis: Celery result middleware
+    # password is defined in the conf
+    redis:
+        image: redis:5
+        hostname: core-redis
+        container_name: redis
+        restart: always
+        ports:
+            - '${CORE_RESULT_HPORT}:${CORE_RESULT_CPORT}'
+        volumes:
+            - ./dependencies/redis.conf:/usr/local/etc/redis/redis.conf
+            - ${CORE_TMP_MOUNT}redis:/data
+        command:
+            - redis-server
+            - /usr/local/etc/redis/redis.conf
+        networks:
+            - core-net
+
+    redis-webui:
+        image: rediscommander/redis-commander:latest
+        hostname: core-redis-commander
+        container_name: redis-webui
+        restart: always
+        environment:
+            - REDIS_HOSTS=local:redis:6379:0:test
+            - HTTP_USER=${CORE_USER}
+            - HTTP_PASSWORD=${CORE_PASSWORD}
+        ports:
+            - "8083:8081"
+        networks:
+            - core-net
+
+    # Celery task middleware
+    rabbitmq:
+        image: rabbitmq:management
+        hostname: core-rabbitmq
+        container_name: rabbitmq
+        restart: always
+        environment:
+            RABBITMQ_VM_MEMORY_HIGH_WATERMARK: '1024MiB'
+            RABBITMQ_DEFAULT_USER: ${CORE_USER}
+            RABBITMQ_DEFAULT_PASS: ${CORE_PASSWORD}
+        ports:
+            - '${CORE_BROKER_HPORT}:${CORE_BROKER_CPORT}'
+            - '8080:15672'
+        volumes:
+            - ${CORE_TMP_MOUNT}rabbitmq:/var/lib/rabbitmq
+        networks:
+            - core-net
+networks:
+    core-net:
+        driver: bridge
+    # # Log storage for finished experiments
+    # mongo:
+    #     hostname: core-mongo
+    #     image: mongo
+    #     container_name: ${MONGO_CONTAINER_NAME}
+    #     restart: always
+    #     environment:
+    #         MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+    #         MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    #     volumes:
+    #         - ${DISK_MOUNT_POINT}/mongo:/data/db
+
+    # # MongoDB web-ui
+    # mongo-express:
+    #     image: mongo-express
+    #     hostname: core-mongo-express
+    #     container_name: ${MONGO_EXPRESS_CONTAINER_NAME}
+    #     restart: always
+    #     ports:
+    #         - 8081:8081
+    #     environment:
+    #         ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
+    #         ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+    #         ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USERNAME}
+    #         ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}

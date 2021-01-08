@@ -1,0 +1,4 @@
+docker==4.4.1
+celery[redis]==4.*
+orjson>=3,<4
+PyYAML==5.3.1
