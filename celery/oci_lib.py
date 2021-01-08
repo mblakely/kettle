@@ -2,7 +2,6 @@ import docker as oci
 import os
 
 
-#linux_working_dir = r'\\wsl$\Ubuntu-20.04\home\ubuntu\ioGenetics'
 linux_working_dir = os.environ['KETTLE_MOUNT_ROOT']
 gatk_image = 'broadinstitute/gatk:latest'
 
